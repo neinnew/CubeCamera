@@ -1,0 +1,19 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CubeCamera", "CubeCamera\CubeCamera.csproj", "{F8FC1A25-EF82-46DB-B9C2-2F93A7B813BA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Workshop|Any CPU = Workshop|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F8FC1A25-EF82-46DB-B9C2-2F93A7B813BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8FC1A25-EF82-46DB-B9C2-2F93A7B813BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8FC1A25-EF82-46DB-B9C2-2F93A7B813BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8FC1A25-EF82-46DB-B9C2-2F93A7B813BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8FC1A25-EF82-46DB-B9C2-2F93A7B813BA}.Workshop|Any CPU.ActiveCfg = Workshop|Any CPU
+        {F8FC1A25-EF82-46DB-B9C2-2F93A7B813BA}.Workshop|Any CPU.Build.0 = Workshop|Any CPU
+	EndGlobalSection
+EndGlobal

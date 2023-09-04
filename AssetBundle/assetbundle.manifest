@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 3646600029
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: b567992203d65ab6790af8088fb6747d
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 72044e15c916ce477fe9050db74ef82a
+HashAppended: 0
+ClassTypes:
+- Class: 72
+  Script: {instanceID: 0}
+Assets:
+- Assets/Converter.compute
+Dependencies: []

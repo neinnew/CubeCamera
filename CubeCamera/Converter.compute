@@ -1,0 +1,112 @@
+﻿#pragma kernel Cubemap
+#pragma kernel Equirectangular
+
+// I kept that following 6 faces as RWTexture2D<float4> rather than Texture2D<float4> for correct gamma.
+// see also: https://forum.unity.com/threads/compute-shader-darkening-colors.526366/#post-3522534
+RWTexture2D<float4> _FrontFace;
+RWTexture2D<float4> _LeftFace;
+RWTexture2D<float4> _RightFace;
+RWTexture2D<float4> _BackFace;
+RWTexture2D<float4> _TopFace;
+RWTexture2D<float4> _BottomFace;
+
+RWTexture2D<float4> _Result;
+
+uint2 _FrontOffset;
+uint2 _LeftOffset;
+uint2 _RightOffset;
+uint2 _BackOffset;
+uint2 _TopOffset;
+uint2 _BottomOffset;
+
+uint _FaceSize;
+uint _Width;
+uint _Height;
+
+[numthreads(8, 8, 1)]
+void Cubemap(uint3 id : SV_DispatchThreadID)
+{
+    float4 front = _FrontFace[id.xy - _FrontOffset];
+    float4 left = _LeftFace[id.xy - _LeftOffset];
+    float4 right = _RightFace[id.xy - _RightOffset];
+    float4 back = _BackFace[id.xy - _BackOffset];
+    float4 top = _TopFace[id.xy - _TopOffset];
+    float4 bottom = _BottomFace[id.xy - _BottomOffset];
+    
+    _Result[id.xy] = front + left + right + back + top + bottom;
+}
+
+// modified from: https://stackoverflow.com/questions/34250742/converting-a-cubemap-into-equirectangular-panorama
+[numthreads(8, 8, 1)]
+void Equirectangular(uint3 id : SV_DispatchThreadID)
+{
+    float u = (float)id.x / _Width;
+    float v = 1.f - (float)id.y / _Height;
+    
+    static const float PI = 3.14159265f;
+
+    float theta = v * PI;
+    float phi = u * 2 * PI;
+
+    float3 unitVector;
+    
+    unitVector.x = sin(phi) * sin(theta) * -1;
+    unitVector.y = cos(theta);
+    unitVector.z = cos(phi) * sin(theta) * -1;
+
+    float targetDir = max(max(abs(unitVector.x), abs(unitVector.y)), abs(unitVector.z));
+
+    float xDir = unitVector.x / targetDir;
+    float yDir = unitVector.y / targetDir;
+    float zDir = unitVector.z / targetDir;
+
+    uint2 pixel;
+    
+    if (targetDir == unitVector.z) // Front
+    {
+        pixel.x = (uint)((xDir + 1.f) / 2.f * _FaceSize);
+        pixel.y = (uint)((yDir + 1.f) / 2.f * _FaceSize);
+        _Result[id.xy] = _FrontFace[pixel];
+
+        // An attempt to resolve that some pixels of the rightmost 1px line are not drew
+        // I don't know why it's happening something might be wrong
+        if (_Result[id.xy].a == 0.0f)
+        {
+            pixel.x -= 1;
+            _Result[id.xy] = _FrontFace[pixel];
+        }
+    }
+    else if (targetDir == -unitVector.x) // Left
+    {
+        pixel.x = (uint)((zDir + 1.f) / 2.f * _FaceSize);
+        pixel.y = (uint)((yDir + 1.f) / 2.f * _FaceSize);
+        _Result[id.xy] = _LeftFace[pixel];
+    }
+    else if (targetDir == unitVector.x) // Right
+    {
+        pixel.x = _FaceSize - (uint)(((zDir + 1.f) / 2.f) * _FaceSize) - 1;
+        pixel.y = (uint)((yDir + 1.f) / 2.f * _FaceSize);
+        _Result[id.xy] = _RightFace[pixel];
+    }
+    else if (targetDir == -unitVector.z) // Back
+    {
+        pixel.x = _FaceSize - (uint)(((xDir + 1.f) / 2.f) * _FaceSize) - 1;
+        pixel.y = (uint)((yDir + 1.f) / 2.f * _FaceSize);
+        _Result[id.xy] = _BackFace[pixel];
+    }
+    else if (targetDir == unitVector.y) // Top
+    {
+        pixel.x = (uint)((xDir + 1.f) / 2.f  * _FaceSize);
+        pixel.y = _FaceSize - (uint)(((zDir + 1.f) / 2.f ) * _FaceSize) - 1;
+        _Result[id.xy] = _TopFace[pixel];
+    }
+    else if (targetDir == -unitVector.y) // Bottom
+    {
+        pixel.x = (uint)((xDir + 1.f) / 2.f * _FaceSize);
+        pixel.y = (uint)((zDir + 1.f) / 2.f * _FaceSize);
+        _Result[id.xy] = _BottomFace[pixel];
+    }
+    else
+    {
+    }
+}
